@@ -1,0 +1,35 @@
+diff --git a/xen/arch/x86/mm.c b/xen/arch/x86/mm.c
+index 2eed84e..0546e56 100644
+--- a/xen/arch/x86/mm.c
++++ b/xen/arch/x86/mm.c
+@@ -767,6 +767,8 @@ get_page_from_l1e(
+     struct domain *real_pg_owner;
+     bool_t write;
+ 
++    smp_rmb();
++
+     if ( !(l1f & _PAGE_PRESENT) )
+         return 0;
+ 
+diff --git a/xen/common/grant_table.c b/xen/common/grant_table.c
+index fd25728..f9ebd8e 100644
+--- a/xen/common/grant_table.c
++++ b/xen/common/grant_table.c
+@@ -572,6 +572,8 @@ __gnttab_map_grant_ref(
+     rgt = rd->grant_table;
+     spin_lock(&rgt->lock);
+ 
++    smp_rmb();
++
+     if ( rgt->gt_version == 0 )
+         PIN_FAIL(unlock_out, GNTST_general_error,
+                  "remote grant table not yet set up");
+@@ -1371,6 +1373,8 @@ gnttab_setup_table(
+     }
+     
+  out3:
++    smp_wmb();
++
+     spin_unlock(&gt->lock);
+  out2:
+     rcu_unlock_domain(d);
